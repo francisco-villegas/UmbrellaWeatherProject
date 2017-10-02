@@ -55,10 +55,6 @@ dependencies {
     //Bootstrap
     compile 'com.beardedhen:androidbootstrap:2.3.2'
 
-    //Firebase
-    compile 'com.google.firebase:firebase-auth:11.0.4'
-    compile 'com.google.firebase:firebase-messaging:11.0.4'
-
     //Picaso
     compile 'com.squareup.picasso:picasso:2.5.2'
 
