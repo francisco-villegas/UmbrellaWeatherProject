@@ -89,11 +89,11 @@ public class UnitDialogClass extends Dialog {
                     editor.commit();
                     Toast.makeText(c, "Units changed successfully", Toast.LENGTH_SHORT).show();
                     ((OnUnitEventListener) c).UnitUpdated(units);
-                    dismiss();
                 } else{
                     Toast.makeText(c, "No changes were made", Toast.LENGTH_SHORT).show();
 //                    ((OnUnitEventListener) c).UnitUpdated("");
                 }
+                dismiss();
                 break;
         }
     }

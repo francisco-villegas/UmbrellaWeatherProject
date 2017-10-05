@@ -3,7 +3,7 @@ package com.example.pancho.umbrellaweatherproject.view.settingsactivity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.pancho.umbrellaweatherproject.model.Settings;
+import com.example.pancho.umbrellaweatherproject.entities.Settings;
 import com.example.pancho.umbrellaweatherproject.util.CONSTANTS;
 
 import java.util.ArrayList;

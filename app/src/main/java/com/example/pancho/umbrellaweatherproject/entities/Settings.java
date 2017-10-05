@@ -1,4 +1,4 @@
-package com.example.pancho.umbrellaweatherproject.model;
+package com.example.pancho.umbrellaweatherproject.entities;
 
 /**
  * Created by Pancho on 9/4/2017.

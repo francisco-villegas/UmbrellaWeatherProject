@@ -1,4 +1,4 @@
-package com.example.pancho.umbrellaweatherproject.model;
+package com.example.pancho.umbrellaweatherproject.entities;
 
 import java.util.List;
 

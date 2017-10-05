@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.pancho.umbrellaweatherproject.R;
-import com.example.pancho.umbrellaweatherproject.model.HourlyNeeded;
+import com.example.pancho.umbrellaweatherproject.entities.HourlyNeeded;
 import com.example.pancho.umbrellaweatherproject.util.CONSTANTS;
 import com.github.pwittchen.weathericonview.WeatherIconView;
 

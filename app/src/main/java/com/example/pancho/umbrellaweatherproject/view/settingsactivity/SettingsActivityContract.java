@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.example.pancho.umbrellaweatherproject.BasePresenter;
 import com.example.pancho.umbrellaweatherproject.BaseView;
-import com.example.pancho.umbrellaweatherproject.model.Settings;
+import com.example.pancho.umbrellaweatherproject.entities.Settings;
 
 import java.util.List;
 

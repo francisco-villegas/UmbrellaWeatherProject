@@ -3,6 +3,7 @@ package com.example.pancho.umbrellaweatherproject.view.settingsactivity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.BoolRes;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -14,11 +15,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.example.pancho.umbrellaweatherproject.App;
 import com.example.pancho.umbrellaweatherproject.R;
-import com.example.pancho.umbrellaweatherproject.injection.settingsactivity.DaggerSettingsActivityComponent;
-import com.example.pancho.umbrellaweatherproject.model.Settings;
+import com.example.pancho.umbrellaweatherproject.entities.Settings;
+import com.example.pancho.umbrellaweatherproject.injection.sharepreferences.MySharedPreferences;
 import com.example.pancho.umbrellaweatherproject.util.CONSTANTS;
 import com.example.pancho.umbrellaweatherproject.view.mainactivity.MainActivity;
+import com.f2prateek.rx.preferences2.Preference;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,9 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.Observer;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 
 public class SettingsActivity extends AppCompatActivity implements SettingsActivityContract.View, ZipDialogClass.OnZipEventListener, UnitDialogClass.OnUnitEventListener {
@@ -34,6 +40,10 @@ public class SettingsActivity extends AppCompatActivity implements SettingsActiv
 
     @Inject
     SettingsActivityPresenter presenter;
+
+    @Inject
+    MySharedPreferences prefs;
+
     @BindView(R.id.toolbar2)
     Toolbar toolbar;
     @BindView(R.id.recycler_settings)
@@ -41,10 +51,15 @@ public class SettingsActivity extends AppCompatActivity implements SettingsActiv
 
     RecyclerView.LayoutManager layoutManager;
     RecyclerView.ItemAnimator itemAnimator;
-    private List<Settings> settingsList;
-    private SettingsAdapter settingsAdapter;
+    List<Settings> settingsList;
+    SettingsAdapter settingsAdapter;
 
     private HashMap<String, String> changes = new HashMap<>();
+    private Preference<Boolean> zip_error;
+
+    private CompositeDisposable disposables;
+
+    ZipDialogClass cdd;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -63,12 +78,47 @@ public class SettingsActivity extends AppCompatActivity implements SettingsActiv
         getWindow().setStatusBarColor(ContextCompat.getColor(this,R.color.gray));
 
         initRecyclerView();
+    }
 
-        String action = getIntent().getAction();
-        if(action != null && action.equals("forceZip")){
-            ZipDialogClass cdd = new ZipDialogClass(this);
-            cdd.show();
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        disposables = new CompositeDisposable();
+        sharePreferencesObservableZIPError();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        disposables.dispose();
+    }
+
+    private void sharePreferencesObservableZIPError() {
+        zip_error = prefs.getBooleanPreference(CONSTANTS.MY_PREFS_ERROR, false);
+        zip_error.asObservable().subscribe(new Observer<Boolean>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                disposables.add(d);
+            }
+
+            @Override
+            public void onNext(Boolean error) {
+                Log.d(TAG, "onNext: " + error);
+                if(error && (cdd == null || !cdd.isShowing())) {
+                    cdd = new ZipDialogClass(SettingsActivity.this);
+                    cdd.show();
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+            }
+
+            @Override
+            public void onComplete() {
+            }
+        });
+
     }
 
     private void initRecyclerView() {
@@ -85,7 +135,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsActiv
     }
 
     private void setupDaggerComponent() {
-        DaggerSettingsActivityComponent.create().insert(this);
+        ((App) getApplicationContext()).getSettingsActivityComponent().insert(this);
     }
 
     @Override

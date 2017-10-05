@@ -20,6 +20,7 @@ public class CONSTANTS {
     public static final String MY_PREFS = "prefs";
     public static final String MY_PREFS_ZIP = "zip";
     public static final String MY_PREFS_UNITS = "units";
+    public static final String MY_PREFS_ERROR = "MY_PREFS_ERROR";
     public static final String MY_PREFS_TIME_REST = "time_rest";
     public static final String MY_PREFS_JSON = "json";
 

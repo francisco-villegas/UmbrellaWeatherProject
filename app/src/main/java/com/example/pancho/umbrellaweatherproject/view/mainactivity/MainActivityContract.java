@@ -1,13 +1,10 @@
 package com.example.pancho.umbrellaweatherproject.view.mainactivity;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
 import com.example.pancho.umbrellaweatherproject.BasePresenter;
 import com.example.pancho.umbrellaweatherproject.BaseView;
 import com.example.pancho.umbrellaweatherproject.injection.sharepreferences.MySharedPreferences;
-import com.example.pancho.umbrellaweatherproject.model.CurrentObservation;
-import com.example.pancho.umbrellaweatherproject.model.HourlyForecastOrdered;
+import com.example.pancho.umbrellaweatherproject.entities.CurrentObservation;
+import com.example.pancho.umbrellaweatherproject.entities.HourlyForecastOrdered;
 
 import java.util.List;
 
@@ -30,6 +27,8 @@ public interface MainActivityContract {
     }
 
     interface Presenter extends BasePresenter<View>{
+
+        void attachRemote();
 
         void getHeaderText(CurrentObservation currentObservation, String unit);
 

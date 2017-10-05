@@ -1,7 +1,6 @@
 package com.example.pancho.umbrellaweatherproject.view.mainactivity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -11,6 +10,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,14 +24,12 @@ import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.example.pancho.umbrellaweatherproject.App;
 import com.example.pancho.umbrellaweatherproject.R;
-import com.example.pancho.umbrellaweatherproject.injection.mainactivity.DaggerMainActivityComponent;
-import com.example.pancho.umbrellaweatherproject.injection.sharepreferences.ContextModule;
 import com.example.pancho.umbrellaweatherproject.injection.sharepreferences.MySharedPreferences;
-import com.example.pancho.umbrellaweatherproject.injection.sharepreferences.SharedPreferencesModule;
-import com.example.pancho.umbrellaweatherproject.model.CurrentObservation;
-import com.example.pancho.umbrellaweatherproject.model.HourlyForecastOrdered;
+import com.example.pancho.umbrellaweatherproject.entities.CurrentObservation;
+import com.example.pancho.umbrellaweatherproject.entities.HourlyForecastOrdered;
 import com.example.pancho.umbrellaweatherproject.util.CONSTANTS;
 import com.example.pancho.umbrellaweatherproject.view.settingsactivity.SettingsActivity;
+import com.f2prateek.rx.preferences2.Preference;
 import com.flurry.android.FlurryAgent;
 
 import java.util.HashMap;
@@ -42,7 +40,10 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.fabric.sdk.android.Fabric;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
+import static android.R.attr.data;
 import static com.example.pancho.umbrellaweatherproject.util.CONSTANTS.*;
 
 
@@ -72,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
 
     private CurrentObservation currentObservation;
 
+    boolean zip_flag = false;
+    boolean unit_flag = false;
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +97,66 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         initPresenter();
 
         presenter.makeRestCall(false, prefs);
+
+        sharePreferencesObservableZipCode();
+        sharePreferencesObservableUnits();
+    }
+
+    private void sharePreferencesObservableZipCode() {
+        Preference<String> zip = prefs.getStringPreference(CONSTANTS.MY_PREFS_ZIP, "");
+        zip.asObservable().subscribe(new Observer<String>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+            }
+
+            @Override
+            public void onNext(String zip) {
+                if (zip_flag) {
+                    if (zip.equals("")) {
+                        finish();
+                    }
+                    presenter.makeRestCall(true, prefs);
+                } else
+                    zip_flag = true;
+            }
+
+
+            @Override
+            public void onError(Throwable e) {
+            }
+
+            @Override
+            public void onComplete() {
+            }
+        });
+
+    }
+
+    private void sharePreferencesObservableUnits() {
+        Preference<String> units = prefs.getStringPreference(CONSTANTS.MY_PREFS_UNITS, "Fahrenheit");
+        units.asObservable().subscribe(new Observer<String>() {
+            @Override
+            public void onSubscribe(Disposable d) {}
+
+            @Override
+            public void onNext(String unit_changes) {
+                if(unit_flag && firstAdapter != null) {
+                    firstAdapter.setUnits(unit_changes);
+                    firstAdapter.notifyDataSetChanged();
+                    presenter.getHeaderText(currentObservation, unit_changes);
+                    presenter.getHeaderColor(currentObservation, unit_changes);
+                } else
+                    unit_flag = true;
+            }
+
+
+            @Override
+            public void onError(Throwable e) {}
+
+            @Override
+            public void onComplete() {}
+        });
+
     }
 
     private void initToolbar() {
@@ -115,35 +179,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
 
     private void initPresenter() {
         presenter.attachView(this);
+        presenter.attachRemote();
     }
 
     private void setupDaggerComponent() {
         ((App) getApplicationContext()).getMainActivityComponent().insert(this);
-    }
-
-    /**
-     * Validate if the result received is valid or not
-     * If is valid
-     *      If the zip code was changed make a rest call
-     *      If the degrees were changed just change the adapter
-     *  **/
-    private void CheckResultBackSettings(Intent data) {
-        String zip = prefs.getString(CONSTANTS.MY_PREFS_ZIP, "");
-        if (zip.equals("")) {
-            finish();
-        } else {
-            HashMap<String, String> changes = (HashMap<String, String>) data.getSerializableExtra(CONSTANTS.RESULT_BACK_VALUE);
-            String zip_changes = changes.get(CONSTANTS.MY_PREFS_ZIP);
-            String unit_changes = changes.get(CONSTANTS.MY_PREFS_UNITS);
-            if (zip_changes != null && !zip_changes.equals(""))
-                presenter.makeRestCall(true, prefs);
-            else if (unit_changes != null && !unit_changes.equals("")) {
-                firstAdapter.setUnits(unit_changes);
-                firstAdapter.notifyDataSetChanged();
-                presenter.getHeaderText(currentObservation, unit_changes);
-                presenter.getHeaderColor(currentObservation, unit_changes);
-            }
-        }
     }
 
     @Override
@@ -165,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         switch (item.getItemId()) {
             case R.id.action_settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
-                this.startActivityForResult(intent, CONSTANTS.RESULT_BACK);
+                startActivityForResult(intent, CONSTANTS.RESULT_BACK);
                 break;
         }
         return true;
@@ -182,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         String unit = prefs.getString(CONSTANTS.MY_PREFS_UNITS, "Fahrenheit");
         presenter.getHeaderText(currentObservation, unit);
         presenter.getHeaderColor(currentObservation, unit);
+        prefs.putBoolean(CONSTANTS.MY_PREFS_ERROR, false);
     }
 
     /** This is the content for the recyclerviews **/
@@ -206,9 +247,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
     /** If the zip is invalid we open the settings activity with the dialog **/
     @Override
     public void InvalidOrNullZip() {
+        //Clean the flag and then set the error to fire the event
+        prefs.putBoolean(CONSTANTS.MY_PREFS_ERROR, false);
+        prefs.putBoolean(CONSTANTS.MY_PREFS_ERROR, true);
+
         Intent intent = new Intent(this, SettingsActivity.class);
-        intent.setAction("forceZip");
-        this.startActivityForResult(intent, CONSTANTS.RESULT_BACK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivityForResult(intent, CONSTANTS.RESULT_BACK);
     }
 
     @Override
@@ -227,8 +272,20 @@ public class MainActivity extends AppCompatActivity implements MainActivityContr
         super.onActivityResult(requestCode, resultCode, data);
         switch (resultCode) {
             case CONSTANTS.RESULT_BACK:
-                CheckResultBackSettings(data);
+                CheckResultBackSettings();
                 break;
         }
+    }
+
+    /**
+     * Validate if we have an invalid zip code
+     * If is not valid
+     *      exit application
+     *  **/
+    private void CheckResultBackSettings() {
+        boolean error = prefs.getBoolean(CONSTANTS.MY_PREFS_ERROR, false);
+        Log.d(TAG, "CheckResultBackSettings: " + error);
+        if(error)
+            finish();
     }
 }

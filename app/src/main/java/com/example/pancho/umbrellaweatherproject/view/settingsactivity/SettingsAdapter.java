@@ -12,7 +12,7 @@ import android.view.animation.ScaleAnimation;
 import android.widget.TextView;
 
 import com.example.pancho.umbrellaweatherproject.R;
-import com.example.pancho.umbrellaweatherproject.model.Settings;
+import com.example.pancho.umbrellaweatherproject.entities.Settings;
 
 import java.util.List;
 import java.util.Random;

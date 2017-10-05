@@ -65,11 +65,11 @@ public class ZipDialogClass extends Dialog {
                     editor.commit();
                     Toast.makeText(c, "Zip code saved successfully", Toast.LENGTH_SHORT).show();
                     ((OnZipEventListener) c).ZipUpdated(zip);
-                    dismiss();
                 } else{
                     Toast.makeText(c, "No changes were made", Toast.LENGTH_SHORT).show();
 //                    ((OnZipEventListener) c).ZipUpdated("");
                 }
+                dismiss();
                 break;
         }
     }

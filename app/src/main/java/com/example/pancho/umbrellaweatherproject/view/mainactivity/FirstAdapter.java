@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.pancho.umbrellaweatherproject.R;
-import com.example.pancho.umbrellaweatherproject.model.HourlyForecastOrdered;
+import com.example.pancho.umbrellaweatherproject.entities.HourlyForecastOrdered;
 
 import java.util.List;
 

@@ -1,10 +1,10 @@
 
-package com.example.pancho.umbrellaweatherproject.model;
+package com.example.pancho.umbrellaweatherproject.entities;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Dewpoint {
+public class Snow {
 
     @SerializedName("english")
     @Expose

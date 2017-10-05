@@ -28,7 +28,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.settingsactivity.SettingsActivity"/>
+        <activity android:name=".view.settingsactivity.SettingsActivity" android:launchMode="singleInstance"/>
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="b9ebabcf3fc4fec48332f2c424bc3fdf32018f83" />
